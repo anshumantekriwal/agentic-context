@@ -1,8 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Form
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form, Depends
 from uuid import uuid4
 import os
 from typing import List
 import shutil
+from middleware.auth import verify_api_key
 from langchain_community.document_loaders import PyMuPDFLoader, TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
@@ -58,7 +59,7 @@ def split_document(document: Document) -> List[Document]:
     return splitter.split_documents([document])
 
 @router.post("/upload", response_model=UploadResponse)
-async def upload_file(file: UploadFile = File(...), agent_id: str = Form(...)) -> UploadResponse:
+async def upload_file(file: UploadFile = File(...), agent_id: str = Form(...), _: None = Depends(verify_api_key)) -> UploadResponse:
     """
     Upload and process a document file (PDF or TXT)
     

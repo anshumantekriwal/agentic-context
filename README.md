@@ -78,13 +78,13 @@ Query the processed document using natural language.
 
 ```bash
 # Upload a document
-curl -X POST https://agentic-context.onrender.com/api/v1/upload \
+curl --retry 3 -X POST https://agentic-context.onrender.com/api/v1/upload \
   -H "X-API-Key: your_api_key_here" \
   -F "file=@uploads/CS.pdf" \
   -F "agent_id=test"
 
 # Query the document
-curl -X POST https://agentic-context.onrender.com/api/v1/query \
+curl --retry 3 -X POST https://agentic-context.onrender.com/api/v1/query \
   -H "X-API-Key: your_api_key_here" \
   -H "Content-Type: application/json" \
   -d '{"query": "Who wrote Intro to Statistical Learning with Python?", "agent_id": "test"}'
@@ -94,17 +94,28 @@ curl -X POST https://agentic-context.onrender.com/api/v1/query \
 
 ```python
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
-API_KEY = "your_api_key_here"
+API_KEY = "your_api_key_here"  # Replace with your actual API key
 BASE_URL = "https://agentic-context.onrender.com/api/v1"
 headers = {"X-API-Key": API_KEY}
+
+# Configure retry strategy
+retry_strategy = Retry(
+    total=3,
+    backoff_factor=1,
+    status_forcelist=[500, 502, 503, 504]
+)
+session = requests.Session()
+session.mount("https://", HTTPAdapter(max_retries=retry_strategy))
 
 # Upload a document
 files = {
     "file": ("CS.pdf", open("uploads/CS.pdf", "rb")),
     "agent_id": (None, "test")
 }
-response = requests.post(f"{BASE_URL}/upload", files=files, headers=headers)
+response = session.post(f"{BASE_URL}/upload", files=files, headers=headers)
 upload_data = response.json()
 
 # Query the document
@@ -112,7 +123,7 @@ query_data = {
     "query": "Who wrote Intro to Statistical Learning with Python?",
     "agent_id": "test"
 }
-response = requests.post(
+response = session.post(
     f"{BASE_URL}/query",
     json=query_data,
     headers=headers

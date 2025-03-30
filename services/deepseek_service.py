@@ -37,7 +37,7 @@ class DeepSeekService:
     def _get_formatting_prompt(self, chunks: List[str]) -> str:
         """Create the formatting prompt"""
         return f'''
-        You are a formatting and organization assistant.
+You are a formatting and organization assistant.
 
 Your job is to take the raw information retrieved by a RAG system (provided below) 
 and process it to create a clear, well-structured, and logically ordered context.

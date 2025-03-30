@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException
-from models.schema import QueryRequest, QueryResponse, RetrieveRequest, FormatRequest
+from fastapi import APIRouter, HTTPException, Depends
+from models.schema import QueryRequest, QueryResponse
 from services.chroma_service import ChromaService
 from services.deepseek_service import DeepSeekService
+from middleware.auth import verify_api_key
 
 router = APIRouter()
 
 @router.post("/query", response_model=QueryResponse)
-async def query_document(request: QueryRequest) -> QueryResponse:
+async def query_document(request: QueryRequest, _: None = Depends(verify_api_key)) -> QueryResponse:
     """
     Process a user query with RAG
     

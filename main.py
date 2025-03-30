@@ -28,16 +28,6 @@ async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "message": "RAG system is running"}
 
-@app.post("/upload", response_model=UploadResponse)
-async def upload_document(request: Request, _: None = Depends(verify_api_key)):
-    # Your existing upload logic here
-    pass
-
-@app.post("/query", response_model=QueryResponse)
-async def query_document(request: Request, query: QueryRequest, _: None = Depends(verify_api_key)):
-    # Your existing query logic here
-    pass
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

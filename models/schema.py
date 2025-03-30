@@ -1,25 +1,13 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
+class APIKey(BaseModel):
+    api_key: str = Field(..., min_length=10, max_length=10, pattern="^[a-zA-Z0-9]{10}$")
+
 class UploadResponse(BaseModel):
     agent_id: str
     filename: str
     chunk_count: int
-
-class RetrieveRequest(BaseModel):
-    query: str
-    agent_id: str
-    top_k: int = Field(default=5, ge=1, le=20)
-
-class RetrieveResponse(BaseModel):
-    chunks: List[str]
-    metadata: Optional[List[dict]] = None
-
-class FormatRequest(BaseModel):
-    chunks: List[str]
-
-class FormatResponse(BaseModel):
-    formatted_context: str
 
 class QueryRequest(BaseModel):
     query: str

@@ -39,13 +39,33 @@ def load_document(file_path: str) -> Document:
     file_ext = os.path.splitext(file_path)[1].lower()
     
     if file_ext == ".pdf":
-        loader = PyMuPDFLoader(file_path)
-        documents = loader.load()
-        text = " ".join(map(lambda x: x.page_content, documents))
+        try:
+            loader = PyMuPDFLoader(file_path)
+            documents = loader.load()
+            # Handle potential encoding issues in PDF text
+            text = " ".join(
+                doc.page_content.encode('utf-8', errors='ignore').decode('utf-8')
+                for doc in documents
+            )
+        except Exception as e:
+            raise ValueError(f"Error processing PDF file: {str(e)}")
     else:  # .txt
-        loader = TextLoader(file_path)
-        documents = loader.load()
-        text = documents[0].page_content
+        # Try different encodings
+        encodings = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
+        text = None
+        
+        for encoding in encodings:
+            try:
+                with open(file_path, 'r', encoding=encoding) as f:
+                    text = f.read()
+                break
+            except UnicodeDecodeError:
+                continue
+                
+        if text is None:
+            raise ValueError(f"Could not read file with any of the encodings: {encodings}")
+            
+        documents = [Document(page_content=text)]
         
     return Document(page_content=text)
 
